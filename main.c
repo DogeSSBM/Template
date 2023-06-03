@@ -2,8 +2,9 @@
 
 int main(int argc, char **argv)
 {
-    assertExprMsg(argc == 2, "Usage: %s <SourceFile>", argv[0]);
-    char *source = fileReadText(argv[1]);
-    printf("source: %s\n", source);
+    assertExprMsg(argc > 1, "Usage: %s <arg> [arg]", argv[0]);
+    for(int i = 0; i < argc; i++)
+        printf("argv[%i]: \"%s\"\n", i, argv[i]);
+
     return 0;
 }
