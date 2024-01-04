@@ -1,8 +1,6 @@
 #include "Includes.h"
 
-typedef void(*voidFunc)(void);
-
-voidFunc cval(const char *src, const char *func)
+void cval(const char *src, const char *func)
 {
     char fmtStr[] = "gcc -x c -Wall -Wextra -Wpedantic -Werror -fpic -shared -rdynamic -o borklib.so -ldl - <<EOF\n"
     "#include <stdio.h>\n#include <stdlib.h>\n%s\nEOF";
@@ -11,9 +9,10 @@ voidFunc cval(const char *src, const char *func)
     system(buf);
     free(buf);
     void *handle = dlopen("./borklib.so", RTLD_NOW);
-    voidFunc eval = NULL;
+    void(*eval)(void) = NULL;
     *(void**)(&eval) = dlsym(handle, func);
-    return eval;
+    eval();
+    dlclose(handle);
 }
 
 int main(void)
@@ -24,7 +23,7 @@ int main(void)
     {\
         printf(\"Hello doggo!\\n\");\
     }";
-    voidFunc function = cval(str, "function");
-    function();
+    cval(str, "function");
+
     return 0;
 }
