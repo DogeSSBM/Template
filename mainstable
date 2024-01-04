@@ -1,0 +1,58 @@
+#include "Includes.h"
+
+void cval(const char *src, const char *func)
+{
+    const char *scriptStr = "#!/bin/sh\ngcc -Wall -Wextra -Wpedantic -Werror -fpic -shared -rdynamic -o borklib.so borklib.c -ldl\n";
+    assertExpr(fileOutputWriteText("./lib.sh", scriptStr));
+    assertExpr(system("chmod +x ./lib.sh") == 0);
+    char *includesSrc =
+    "#include <stdlib.h>\n"
+    "#include <ctype.h>\n"
+    "#include <stdint.h>\n"
+    "#include <stdbool.h>\n"
+    "#include <limits.h>\n"
+    "#include <string.h>\n"
+    "#include <stdio.h>\n"
+    "#include <stdarg.h>\n"
+    "#include <stddef.h>\n"
+    "#include <math.h>\n"
+    "#include <tgmath.h>\n"
+    "#include <time.h>\n"
+    "#include <dlfcn.h>\n\n";
+    File *f = fileOpenWriteText("./borklib.c", includesSrc);
+    fwrite(src, sizeof(char), strlen(src), f);
+    fclose(f);
+    assertExpr(system("./lib.sh") == 0);
+    void *handle = dlopen("./borklib.so", RTLD_NOW);
+    assertExpr(handle);
+    voidFunc eval = NULL;
+    *(void**)(&eval) = dlsym(handle, func);
+    eval();
+    assertExpr(!dlclose(handle));
+}
+
+int main(void)
+{
+    srand(time(0));
+    char src[] =
+    "int add(int a, int b)       \
+    {                            \
+        return a + b;            \
+    }                            \
+    void test(void)              \
+    {                            \
+        srand(%u);               \
+        int a = rand()%20;       \
+        int b = rand()%20;       \
+        printf(                  \
+            \"%%i + %%i == %%i\\n\",\
+            a, b, add(a, b)      \
+        );                       \
+    }";
+    char buf[sizeof(src)] = {0};
+    for(uint i = 0; i < 4; i++){
+        sprintf(buf, src, rand()%10);
+        cval(buf, "test");
+    }
+    return 0;
+}

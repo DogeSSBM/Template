@@ -36,4 +36,6 @@ typedef int64_t             i64;
 #define U64MAX              UINT64_MAX
 #define PI                  M_PI
 
+typedef void(*voidFunc)(void);
+
 #endif /* end of include guard: TYPES_H */

@@ -38,4 +38,32 @@ char* fileReadText(const char *filePath)
     return buf;
 }
 
+bool fileWriteText(File *f, const char *text)
+{
+    if(!f || !text)
+        return false;
+    const st len = strlen(text);
+    return fwrite(text, sizeof(char), len, f) == len;
+}
+
+File* fileOpenWriteText(const char *filePath, const char *text)
+{
+    File *f = fopen(filePath, "w");
+    fwrite(text, sizeof(char), strlen(text), f);
+    return f;
+}
+
+bool fileOutputWriteText(const char *filePath, const char *text)
+{
+    if(!filePath || !text)
+        return false;
+    File *f = fopen(filePath, "w");
+    if(!f)
+        return false;
+    const bool ret = fileWriteText(f, text);
+    if(fclose(f))
+        return false;
+    return ret;
+}
+
 #endif /* end of include guard: FILE_H */

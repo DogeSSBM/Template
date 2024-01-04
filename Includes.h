@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <math.h>
+#include <tgmath.h>
+#include <dlfcn.h>
+#include <time.h>
 
 #include "Types.h"
 #include "Panic.h"
